@@ -1,59 +1,258 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AgriLink - Agricultural Marketplace Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern web application connecting farmers directly with buyers, enabling seamless agricultural commerce.
 
-## About Laravel
+## 🌾 Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+AgriLink is a full-stack agricultural marketplace built with Laravel 12 and Vue 3. It empowers farmers to list their products with rich details and images, while providing buyers with access to fresh, local produce.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🎯 Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### For Farmers
+- **Product Management**: Create, edit, and manage product listings
+- **Rich Product Details**: Add harvest dates, certifications, origin, and product features
+- **Image Upload**: Upload high-quality product images with drag-and-drop support
+- **Dashboard**: View sales, revenue, and product performance
+- **Order Management**: Track and manage customer orders
 
-## Learning Laravel
+### For Buyers
+- **Product Discovery**: Browse products by category, availability, and price
+- **Advanced Search**: Find products with powerful filtering options
+- **Shopping Cart**: Add products and manage orders
+- **Farmer Profiles**: View farmer information and ratings
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### For Admin
+- **Farmer Verification**: Approve or reject farmer applications
+- **Product Management**: Monitor all platform products
+- **Order Oversight**: Track all orders and their status
+- **Performance Analytics**: View platform statistics and metrics
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🏗️ Technology Stack
 
-## Laravel Sponsors
+### Backend
+- **Framework**: Laravel 12.40.2
+- **Database**: SQLite
+- **Authentication**: Laravel Sanctum + Session Auth
+- **API**: RESTful API with role-based authorization
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Frontend
+- **Framework**: Vue 3
+- **Server-Side Rendering**: Inertia.js
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite
 
-### Premium Partners
+### Infrastructure
+- **File Storage**: Local disk with public symlink
+- **Image Handling**: Drag-and-drop upload with preview
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🗂️ Project Structure
 
-## Contributing
+```
+agrilink-app/
+├── app/
+│   ├── Http/Controllers/         # Request handlers
+│   ├── Models/                   # Database models
+│   ├── Policies/                 # Authorization policies
+│   └── Middleware/               # Custom middleware
+├── database/
+│   ├── migrations/               # Schema changes
+│   ├── factories/                # Test data factories
+│   └── seeders/                  # Database seeders
+├── resources/
+│   ├── js/
+│   │   ├── Pages/                # Vue page components
+│   │   ├── Layouts/              # Layout components
+│   │   ├── Components/           # Reusable components
+│   │   └── services/             # API service layer
+│   └── css/                      # Tailwind CSS
+├── routes/
+│   ├── web.php                   # Web routes
+│   ├── api.php                   # API routes
+│   └── auth.php                  # Auth routes
+└── storage/                      # File uploads
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Getting Started
 
-## Code of Conduct
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- Node.js & npm
+- SQLite
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Installation
 
-## Security Vulnerabilities
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/CBScarz/agrilink-app.git
+   cd agrilink-app
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install --legacy-peer-deps
+   ```
 
-## License
+3. **Setup environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Run migrations**
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+
+5. **Create storage link**
+   ```bash
+   php artisan storage:link
+   ```
+
+6. **Start development servers**
+   
+   Terminal 1 - Laravel Server:
+   ```bash
+   php artisan serve
+   ```
+   
+   Terminal 2 - Vite Dev Server:
+   ```bash
+   npm run dev
+   ```
+
+7. **Access the application**
+   - URL: `http://localhost:8000`
+
+## 📊 Database Schema
+
+### Core Tables
+- **users**: All platform users (farmers, buyers, admins)
+- **farmer_profiles**: Additional farmer information and verification
+- **products**: Product listings with details and images
+- **orders**: Customer orders
+- **order_items**: Individual items in orders
+
+### Authentication Tables
+- **personal_access_tokens**: API tokens for Sanctum
+- **sessions**: Session data
+- **cache**: Cache storage
+
+## 🔐 User Roles
+
+### Admin
+- Full platform access
+- Manage farmers and their verification
+- Monitor products and orders
+- View platform analytics
+
+### Farmer
+- Create and manage products
+- View product performance
+- Manage customer orders
+- Access dashboard with sales metrics
+
+### Buyer
+- Browse and search products
+- Add products to cart
+- Place orders
+- Manage shopping cart
+
+## 📝 Product Creation Flow
+
+1. **Farmer** navigates to `/farmer/products/create`
+2. **Form** collects all product details:
+   - Basic info (name, description, category)
+   - Pricing & stock details
+   - Optional fields (origin, certifications, harvest dates)
+   - Product features (checkboxes)
+   - Product image (drag-and-drop upload)
+3. **Validation** on both frontend and backend
+4. **Image** uploaded to `storage/app/public/products/`
+5. **Product** stored in database with all metadata
+6. **Display** on marketplace with image
+
+## 🖼️ Image Storage & Display
+
+- Images stored in: `storage/app/public/products/`
+- Public access via: `/storage/products/filename`
+- Supported formats: PNG, JPG, GIF
+- Max file size: 2MB
+- Symlink created via `php artisan storage:link`
+
+## 🧪 Testing
+
+Run migrations and seeders to populate test data:
+```bash
+php artisan migrate:fresh --seed
+```
+
+Test accounts created:
+- Admin user
+- Sample farmers
+- Sample buyers
+
+## 📚 API Documentation
+
+API endpoints are documented in `API_DOCUMENTATION.md`
+
+Key endpoints:
+- `POST /api/farmer/products` - Create product
+- `GET /api/products` - List products
+- `GET /api/farmer/products` - Farmer's products
+- `GET /api/orders` - User orders
+
+## 🔧 Configuration
+
+### Environment Variables
+```env
+APP_NAME=AgriLink
+APP_ENV=local
+APP_DEBUG=true
+DB_DATABASE=sqlite
+VITE_API_URL=http://localhost:8000/api
+```
+
+### Middleware
+- `auth` - Requires authentication
+- `verified` - Requires email verification
+- `admin` - Admin role only
+- `farmer` - Farmer role only
+- `buyer` - Buyer role only
+
+## 🐛 Known Issues & Future Improvements
+
+### Current
+- ✅ Product creation with image upload
+- ✅ Product display with filtering
+- ✅ Role-based access control
+- ✅ Database schema with proper constraints
+
+### Planned
+- Edit/delete products
+- Shopping cart functionality
+- Order tracking
+- Product ratings and reviews
+- Farmer ratings and profiles
+- Payment integration
+- Email notifications
+- Real-time notifications
+
+## 📄 License
+
+This project is open source and available under the MIT license.
+
+## 👥 Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
+
+## 📞 Support
+
+For support, please open an issue on the GitHub repository.
+
+---
+
+**Repository**: https://github.com/CBScarz/agrilink-app
+
+**Last Updated**: December 2, 2025
