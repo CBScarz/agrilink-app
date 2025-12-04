@@ -13,6 +13,10 @@ Route::get('/products/category/{category}', [\App\Http\Controllers\Api\ProductCo
 Route::get('/products/farmer/{farmerId}', [\App\Http\Controllers\Api\ProductController::class, 'getFarmerProducts']);
 Route::get('/products/{product}', [\App\Http\Controllers\Api\ProductController::class, 'show']);
 
+// Product ratings (public read, authenticated write)
+Route::get('/products/{product}/ratings', [\App\Http\Controllers\ProductRatingController::class, 'index']);
+Route::get('/products/top-products', [\App\Http\Controllers\ProductRatingController::class, 'topProducts']);
+
 // Protected routes (auth required)
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -78,12 +82,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('buyer')->middleware('buyer')->group(function () {
         // Orders
         Route::prefix('orders')->group(function () {
+            Route::post('/checkout', [\App\Http\Controllers\Api\Buyer\OrderController::class, 'checkout']);
             Route::get('/', [\App\Http\Controllers\Api\Buyer\OrderController::class, 'index']);
             Route::post('/', [\App\Http\Controllers\Api\Buyer\OrderController::class, 'store']);
             Route::get('/{order}', [\App\Http\Controllers\Api\Buyer\OrderController::class, 'show']);
             Route::post('/{order}/cancel', [\App\Http\Controllers\Api\Buyer\OrderController::class, 'cancel']);
         });
+
+        // Product Ratings
+        Route::post('/products/{product}/ratings', [\App\Http\Controllers\ProductRatingController::class, 'store']);
     });
+
+    // Common authenticated routes
+    Route::get('/farmer/{farmer}/average-rating', [\App\Http\Controllers\ProductRatingController::class, 'farmerAverageRating']);
 
     // Farmer Application (Registration)
     Route::post('/farmer-applications', [\App\Http\Controllers\Api\FarmerApplicationController::class, 'store']);

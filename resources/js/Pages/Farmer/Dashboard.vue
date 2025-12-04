@@ -62,16 +62,16 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm font-medium">Average Rating</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">{{ averageRating }}</p>
-              <div class="flex items-center mt-1 space-x-0.5">
-                <span v-for="i in 5" :key="i" class="text-xs">
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ averageRating.toFixed(1) }}/5</p>
+              <div class="flex items-center mt-1">
+                <span v-for="i in 5" :key="i" :class="i <= Math.floor(averageRating) ? 'text-yellow-400' : 'text-gray-300'" class="text-lg">
                   ⭐
                 </span>
               </div>
             </div>
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </div>
           </div>
@@ -148,7 +148,13 @@
                       <span class="inline-block w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
                       <p class="font-medium text-gray-900">{{ product.name }}</p>
                     </div>
-                    <p class="text-xs text-gray-500">{{ product.category }}</p>
+                    <p class="text-xs text-gray-500 mb-2">{{ product.category }}</p>
+                    <div class="flex items-center space-x-4">
+                      <p class="text-xs text-yellow-600">
+                        <span v-if="product.average_rating > 0">⭐ {{ product.average_rating }}/5 ({{ product.rating_count }} reviews)</span>
+                        <span v-else class="text-gray-500">No ratings yet</span>
+                      </p>
+                    </div>
                   </div>
                   <div class="text-right">
                     <p class="font-semibold text-green-600">₱{{ Number(product.price).toFixed(2) }}</p>

@@ -7,9 +7,94 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class OrderController
 {
+    /**
+     * Create orders from checkout (multiple orders for multiple farmers)
+     */
+    public function checkout(Request $request)
+    {
+        $validated = $request->validate([
+            'orders' => 'required|array',
+            'orders.*.farmer_id' => 'required|integer|exists:user,id',
+            'orders.*.items' => 'required|array',
+            'orders.*.items.*.product_id' => 'required|integer|exists:products,id',
+            'orders.*.items.*.quantity' => 'required|integer|min:1',
+            'orders.*.items.*.unit_price' => 'required|numeric|min:0',
+            'orders.*.payment_method' => 'required|in:card,gcash,cod',
+            'orders.*.delivery_info' => 'required|array',
+        ]);
+
+        $buyerId = auth()->id();
+        $createdOrders = [];
+
+        try {
+            DB::beginTransaction();
+
+            // Create an order for each farmer
+            foreach ($validated['orders'] as $orderData) {
+                $farmerId = $orderData['farmer_id'];
+                $paymentMethod = $orderData['payment_method'];
+                $items = $orderData['items'];
+
+                // Calculate total amount
+                $totalAmount = 0;
+                foreach ($items as $item) {
+                    $totalAmount += $item['quantity'] * $item['unit_price'];
+                }
+
+                // Check stock availability for all items
+                foreach ($items as $item) {
+                    $product = Product::find($item['product_id']);
+                    if (!$product || $product->stock < $item['quantity']) {
+                        throw new \Exception("Insufficient stock for " . ($product->name ?? 'Product'));
+                    }
+                }
+
+                // Create order
+                $order = Order::create([
+                    'buyer_id' => $buyerId,
+                    'farmer_id' => $farmerId,
+                    'total_amount' => $totalAmount,
+                    'status' => 'pending',
+                    'payment_method' => $paymentMethod,
+                ]);
+
+                // Create order items and reduce stock
+                foreach ($items as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                    ]);
+
+                    // Reduce product stock
+                    $product = Product::find($item['product_id']);
+                    $product->reduceStock($item['quantity']);
+                }
+
+                $createdOrders[] = $order;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Orders created successfully',
+                'orders' => $createdOrders,
+                'order_count' => count($createdOrders),
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

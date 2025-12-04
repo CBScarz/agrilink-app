@@ -1,17 +1,30 @@
 <script setup>
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 
 const page = usePage();
 const auth = page.props.auth;
+const products = ref([]);
+const loading = ref(true);
 
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
-    products: {
-        type: Array,
-        default: () => [],
-    },
+});
+
+// Fetch products via API instead of embedding in page
+onMounted(async () => {
+    try {
+        const response = await fetch('/api/products');
+        const data = await response.json();
+        products.value = data.data || data;
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        products.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 </script>
 
@@ -74,8 +87,8 @@ defineProps({
             <div class="mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 mb-8">Featured Products</h2>
                 <div v-if="products.length > 0" class="grid md:grid-cols-4 gap-6">
-                    <div v-for="product in products.slice(0, 4)" :key="product.id" class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden">
-                        <div class="h-48 bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center">
+                    <Link v-for="product in products.slice(0, 4)" :key="product.id" :href="`/products/${product.id}`" class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden cursor-pointer block">
+                        <div class="h-48 bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center hover:from-green-300 hover:to-green-500 transition">
                             <img v-if="product.image_url" :src="`/storage/${product.image_url}`" :alt="product.name" class="w-full h-full object-cover" />
                             <span v-else class="text-green-700 font-semibold">{{ product.category }}</span>
                         </div>
@@ -83,11 +96,8 @@ defineProps({
                             <h3 class="font-bold text-gray-900">{{ product.name }}</h3>
                             <p class="text-sm text-gray-600 mt-1">{{ product.category }} • {{ product.stock > 0 ? 'In Stock' : 'Out of Stock' }}</p>
                             <p class="text-2xl font-bold text-green-600 mt-2">₱{{ product.price }}</p>
-                            <Link :href="`/products/${product.id}`" class="block w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-semibold text-center">
-                                View Details
-                            </Link>
                         </div>
-                    </div>
+                    </Link>
                 </div>
                 <div v-else class="text-center py-12">
                     <p class="text-gray-600 text-lg">No products available yet. Check back soon!</p>

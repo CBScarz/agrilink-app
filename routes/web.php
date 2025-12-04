@@ -16,13 +16,12 @@ Route::get('/', function () {
         return redirect('/farmer/dashboard');
     }
     
-    $products = \App\Models\Product::with('farmer')->limit(4)->get();
+    // Return page WITHOUT products data - fetch via API instead
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
-        'products' => $products,
     ]);
 })->name('home');
 
@@ -41,8 +40,12 @@ Route::get('/farmer/dashboard', function () {
     $totalOrders = \App\Models\Order::where('farmer_id', $farmer->id)->count();
     $totalEarnings = \App\Models\Order::where('farmer_id', $farmer->id)->sum('total_amount') ?? 0;
     
-    // Calculate average rating (placeholder - can add ratings later)
-    $averageRating = 4.5; // This will be updated when ratings are implemented
+    // Calculate average rating from ratings table
+    $farmerProducts = \App\Models\Product::where('farmer_id', $farmer->id)->get();
+    $allRatings = $farmerProducts->flatMap(function ($product) {
+        return $product->ratings;
+    });
+    $averageRating = $allRatings->isEmpty() ? 0 : round($allRatings->avg('rating'), 1);
     
     // Get recent orders
     $recentOrders = \App\Models\Order::where('farmer_id', $farmer->id)
@@ -54,9 +57,22 @@ Route::get('/farmer/dashboard', function () {
     // Get top products
     $topProducts = \App\Models\Product::where('farmer_id', $farmer->id)
         ->withCount('orderItems')
+        ->with('ratings')
         ->orderBy('order_items_count', 'desc')
         ->limit(5)
-        ->get();
+        ->get()
+        ->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category' => $product->category,
+                'price' => $product->price,
+                'image_url' => $product->image_url,
+                'order_items_count' => $product->order_items_count,
+                'average_rating' => round($product->ratings->avg('rating') ?? 0, 1),
+                'rating_count' => $product->ratings->count(),
+            ];
+        });
     
     // Get low stock products
     $lowStockProducts = \App\Models\Product::where('farmer_id', $farmer->id)
@@ -138,9 +154,56 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 });
 
 Route::get('/products', function () {
-    $products = \App\Models\Product::with('farmer')->get();
-    return Inertia::render('Products', ['products' => $products]);
+    return Inertia::render('Products', [
+        // Don't include products in initial render - fetch via API
+    ]);
 })->name('products.index');
+
+Route::get('/products/{product}', function (\App\Models\Product $product) {
+    $product->load(['farmer.farmerProfile', 'ratings.buyer', 'orderItems']);
+    
+    // Calculate farmer's product count
+    $farmerProductCount = $product->farmer->products()->count();
+    
+    // Calculate farmer's response rate (orders received / orders completed)
+    $farmerOrders = $product->farmer->farmerOrders()->count();
+    $farmerCompletedOrders = $product->farmer->farmerOrders()->where('status', 'completed')->count();
+    $responseRate = $farmerOrders > 0 ? round(($farmerCompletedOrders / $farmerOrders) * 100) : 0;
+    
+    // Only include essential product data - ratings loaded via separate API call
+    $safeProduct = [
+        'id' => $product->id,
+        'name' => $product->name,
+        'description' => $product->description,
+        'price' => $product->price,
+        'stock' => $product->stock,
+        'category' => $product->category,
+        'unit' => $product->unit,
+        'origin' => $product->origin ?? null,
+        'image_url' => $product->image_url,
+        'average_rating' => round($product->ratings->avg('rating') ?? 0, 1),
+        'rating_count' => $product->ratings->count(),
+        'order_items_count' => $product->orderItems->count(),
+        'harvestDate' => $product->harvestDate,
+        'expirationDate' => $product->expirationDate,
+        'farmer_id' => $product->farmer_id,
+        'farmer' => [
+            'id' => $product->farmer->id,
+            'name' => $product->farmer->name,
+            'created_at' => $product->farmer->created_at,
+            'farmerProfile' => [
+                'location' => $product->farmer->farmerProfile->location ?? null,
+            ],
+            'product_count' => $farmerProductCount,
+            'response_rate' => $responseRate,
+        ]
+    ];
+    
+    // Related products loaded via API call - not in initial HTML
+    return Inertia::render('ProductDetail', [
+        'product' => $safeProduct,
+    ]);
+})->name('products.show');
 
 Route::get('/farmer/products', [\App\Http\Controllers\ProductController::class, 'farmerProducts'])
     ->middleware(['auth', 'verified'])
@@ -157,6 +220,10 @@ Route::post('/farmer/products', [\App\Http\Controllers\FarmerProductController::
 Route::get('/cart', function () {
     return Inertia::render('Cart', ['cartItems' => []]);
 })->middleware('auth')->name('cart');
+
+Route::get('/checkout', function () {
+    return Inertia::render('Checkout', []);
+})->middleware('auth', 'buyer')->name('checkout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

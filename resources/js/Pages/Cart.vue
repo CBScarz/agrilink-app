@@ -19,18 +19,29 @@
       <div v-else class="grid lg:grid-cols-3 gap-8">
         <!-- Cart Items -->
         <div class="lg:col-span-2">
-          <div class="bg-white rounded-lg shadow-md">
-            <div class="px-6 py-4 border-b border-gray-200">
-              <h2 class="text-lg font-bold text-gray-900">Cart Items</h2>
+          <!-- Group items by farmer -->
+          <div v-for="farmerGroup in itemsGroupedByFarmer" :key="farmerGroup.farmerId" class="bg-white rounded-lg shadow-md mb-6">
+            <!-- Farmer Header -->
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-transparent">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">{{ farmerGroup.farmerName }}</h3>
+                  <p class="text-sm text-gray-600">{{ farmerGroup.farmerLocation }}</p>
+                </div>
+                <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                  {{ farmerGroup.items.length }} {{ farmerGroup.items.length === 1 ? 'item' : 'items' }}
+                </span>
+              </div>
             </div>
 
+            <!-- Items from this farmer -->
             <div class="divide-y divide-gray-200">
-              <div v-for="item in cartItems" :key="item.id" class="px-6 py-4 flex gap-4 hover:bg-gray-50 transition">
+              <div v-for="item in farmerGroup.items" :key="item.id" class="px-6 py-4 flex gap-4 hover:bg-gray-50 transition">
                 <!-- Product Image -->
                 <div class="w-24 h-24 bg-gradient-to-br from-green-200 to-green-400 rounded-lg flex items-center justify-center flex-shrink-0">
                   <img 
                     v-if="item.product.image_url" 
-                    :src="item.product.image_url" 
+                    :src="`/storage/${item.product.image_url}`" 
                     :alt="item.product.name"
                     class="w-full h-full object-cover rounded-lg"
                   />
@@ -46,7 +57,7 @@
                     {{ item.product.name }}
                   </Link>
                   <p class="text-sm text-gray-600 mt-1">{{ item.product.category }}</p>
-                  <p class="text-sm text-gray-600">By: {{ item.product.farmer?.name || 'Local Farmer' }}</p>
+                  <p class="text-sm text-gray-600">Stock available: {{ item.product.stock }}</p>
                   
                   <!-- Quantity Selector -->
                   <div class="flex items-center gap-2 mt-3">
@@ -76,11 +87,11 @@
                 <!-- Price & Remove -->
                 <div class="text-right flex flex-col justify-between">
                   <div>
-                    <p class="text-sm text-gray-600">₱{{ Number(item.product.price).toFixed(2) }}/kg</p>
+                    <p class="text-sm text-gray-600">₱{{ Number(item.product.price).toFixed(2) }}/{{ item.product.unit }}</p>
                     <p class="text-lg font-bold text-green-600 mt-1">₱{{ (item.quantity * item.product.price).toFixed(2) }}</p>
                   </div>
                   <button 
-                    @click="removeFromCart(item)"
+                    @click="handleRemoveFromCart(item)"
                     class="text-red-600 hover:text-red-700 text-sm font-semibold transition"
                   >
                     Remove
@@ -151,15 +162,19 @@
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
+import { useCart } from '../composables/useCart.js';
 
 const { props } = usePage();
-const { auth, cartItems: initialCartItems } = props;
+const { auth } = props;
 
-// Initialize cart items (in a real app, this would come from localStorage or session)
-const cartItems = ref(initialCartItems || []);
+const { cartItems, removeFromCart, updateQuantity, getItemsGroupedByFarmer } = useCart();
 
 const deliveryFee = ref(50);
 const discount = ref(0);
+
+const itemsGroupedByFarmer = computed(() => {
+  return getItemsGroupedByFarmer.value;
+});
 
 const subtotal = computed(() => {
   return cartItems.value.reduce((sum, item) => sum + (item.quantity * item.product.price), 0);
@@ -175,21 +190,18 @@ const total = computed(() => {
 
 const increaseQuantity = (item) => {
   if (item.quantity < item.product.stock) {
-    item.quantity++;
+    updateQuantity(item.id, item.quantity + 1);
   }
 };
 
 const decreaseQuantity = (item) => {
   if (item.quantity > 1) {
-    item.quantity--;
+    updateQuantity(item.id, item.quantity - 1);
   }
 };
 
-const removeFromCart = (item) => {
-  const index = cartItems.value.findIndex(i => i.id === item.id);
-  if (index > -1) {
-    cartItems.value.splice(index, 1);
-  }
+const handleRemoveFromCart = (item) => {
+  removeFromCart(item.id);
 };
 
 const checkout = () => {

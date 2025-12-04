@@ -29,6 +29,7 @@ class Product extends Model
         'price' => 'decimal:2',
         'stock' => 'integer',
     ];
+    protected $appends = ['average_rating', 'rating_count'];
 
     /**
      * Get the farmer that owns the product.
@@ -44,6 +45,30 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Get the ratings for this product.
+     */
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    /**
+     * Get average rating for this product.
+     */
+    public function getAverageRatingAttribute(): float
+    {
+        return $this->ratings()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get rating count for this product.
+     */
+    public function getRatingCountAttribute(): int
+    {
+        return $this->ratings()->count();
     }
 
     /**

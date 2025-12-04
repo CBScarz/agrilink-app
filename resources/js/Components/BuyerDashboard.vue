@@ -1,5 +1,14 @@
 <template>
-  <div class="grid md:grid-cols-4 gap-6 mb-8">
+  <div>
+    <!-- Product Details Modal -->
+    <ProductDetailsModal 
+      :isOpen="selectedProduct !== null" 
+      :product="selectedProduct || {}"
+      @close="selectedProduct = null"
+      @add-to-cart="addToCart"
+    />
+
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
     <!-- Stats Cards -->
     <div class="bg-white rounded-lg shadow p-6 border-t-4 border-green-600">
       <p class="text-gray-600 text-sm font-medium">Total Orders</p>
@@ -71,21 +80,51 @@
     <div class="bg-white rounded-lg shadow p-6">
       <h2 class="text-xl font-bold text-gray-900 mb-6">Recommended Products</h2>
       <div class="space-y-4">
-        <div v-for="i in 3" :key="i" class="border rounded-lg p-3 hover:shadow-md transition">
-          <p class="font-semibold text-gray-900">Fresh {{ ['Tomatoes', 'Carrots', 'Lettuce'][i-1] }}</p>
-          <p class="text-sm text-gray-600">By Farmer John</p>
-          <p class="text-lg font-bold text-green-600 mt-2">₱{{ 50 + i * 20 }}/kg</p>
-          <button class="w-full mt-2 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm transition">
-            Add to Cart
-          </button>
+        <div v-if="recommendedProducts.length === 0" class="text-center py-8 text-gray-500">
+          No products available at the moment.
+        </div>
+        <div v-for="product in recommendedProducts" :key="product.id" class="border rounded-lg p-3 hover:shadow-md transition">
+          <p class="font-semibold text-gray-900">{{ product.name }}</p>
+          <p class="text-sm text-gray-600">By {{ product.farmer?.name || 'Local Farmer' }}</p>
+          <p class="text-lg font-bold text-green-600 mt-2">₱{{ Number(product.price).toFixed(2) }}/{{ product.unit }}</p>
+          <div class="mt-2 space-y-2">
+            <button 
+              @click="openProductDetails(product)"
+              class="w-full py-2 border border-green-600 text-green-600 rounded text-sm font-medium hover:bg-green-50 transition"
+            >
+              View Details
+            </button>
+            <button 
+              v-if="product.stock > 0"
+              @click="addToCart(product)"
+              class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium transition"
+            >
+              Add to Cart
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
+import ProductDetailsModal from './ProductDetailsModal.vue';
+import { useCart } from '../composables/useCart.js';
+
+const { props } = usePage();
+const { auth, products = [] } = props;
+
+const { addToCart: cartAddToCart } = useCart();
+
+const selectedProduct = ref(null);
+
+// Get recommended products (first 3 products)
+const recommendedProducts = ref(products.slice(0, 3) || []);
 
 const getStatus = (i) => {
   const statuses = ['Delivered', 'Processing', 'Shipped', 'Pending', 'Delivered'];
@@ -98,5 +137,15 @@ const getStatusClass = (i) => {
   if (status === 'Processing') return 'bg-yellow-100 text-yellow-700';
   if (status === 'Shipped') return 'bg-blue-100 text-blue-700';
   return 'bg-gray-100 text-gray-700';
+};
+
+const openProductDetails = (product) => {
+  selectedProduct.value = product;
+};
+
+const addToCart = ({ product, quantity = 1 }) => {
+  const result = cartAddToCart(product, quantity);
+  alert(`Added ${quantity} ${product.unit} of ${product.name} to cart!`);
+  selectedProduct.value = null;
 };
 </script>
