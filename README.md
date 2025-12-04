@@ -18,7 +18,11 @@ AgriLink is a full-stack agricultural marketplace built with Laravel 12 and Vue 
 ### For Buyers
 - **Product Discovery**: Browse products by category, availability, and price
 - **Advanced Search**: Find products with powerful filtering options
-- **Shopping Cart**: Add products and manage orders
+- **Shopping Cart**: Add products to cart with cart deduplication by product + farmer
+- **Buy Now**: Direct checkout for single product purchases
+- **Saved Addresses**: Save and reuse delivery addresses with edit/delete options
+- **Multiple Payment Methods**: Credit/Debit Card, GCash, Cash on Delivery
+- **Order Management**: Track orders and view order history
 - **Farmer Profiles**: View farmer information and ratings
 
 ### For Admin
@@ -223,21 +227,28 @@ VITE_API_URL=http://localhost:8000/api
 
 ## 🐛 Known Issues & Future Improvements
 
-### Current
+### Completed ✅
 - ✅ Product creation with image upload
-- ✅ Product display with filtering
+- ✅ Product display with filtering and search
 - ✅ Role-based access control
-- ✅ Database schema with proper constraints
+- ✅ Shopping cart functionality with deduplication
+- ✅ Buy Now feature for direct checkout
+- ✅ Saved addresses for delivery information
+- ✅ Multiple payment method options (Card, GCash, COD)
+- ✅ Multi-farmer order support
+- ✅ Stock validation and inventory management
+- ✅ Form validation with error messages
 
-### Planned
-- Edit/delete products
-- Shopping cart functionality
-- Order tracking
+### Planned 🚀
 - Product ratings and reviews
 - Farmer ratings and profiles
-- Payment integration
-- Email notifications
-- Real-time notifications
+- Email notifications for orders
+- Real-time order status updates
+- Product recommendations
+- Wishlist feature
+- Order cancellation
+- Refund management
+- Advanced analytics for farmers
 
 ## 📄 License
 
@@ -255,4 +266,4 @@ For support, please open an issue on the GitHub repository.
 
 **Repository**: https://github.com/CBScarz/agrilink-app
 
-**Last Updated**: December 2, 2025
+**Last Updated**: December 4, 2025
